@@ -208,6 +208,14 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
           </Table>
         </Card>
       )}
+      {(data?.length ?? 0) > 0 && total > 0 && (
+        <InfiniteSentinel
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          total={total}
+          visibleCount={visible.length}
+        />
+      )}
     </div>
   );
 }
