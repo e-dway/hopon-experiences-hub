@@ -44,6 +44,18 @@ function PoisPage() {
   const [editing, setEditing] = useState<POI | null>(null);
   const [name, setName] = useState("");
   const [gallery, setGallery] = useState<Record<string, GalleryItem>>({});
+  const [q, setQ] = useState("");
+
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (p) =>
+      !q
+        ? true
+        : (p.name || "").toLowerCase().includes(ql) ||
+          (p.tags || []).some((t) => t.toLowerCase().includes(ql)),
+    pageSize: 50,
+  });
 
   useEffect(() => {
     if (editing) {
