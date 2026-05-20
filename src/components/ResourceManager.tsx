@@ -72,7 +72,7 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
     onSuccess: () => qc.invalidateQueries({ queryKey: [queryKey] }),
   });
 
-  const cols = columns ?? [
+  const cols: Array<Column<T>> = columns ?? [
     { header: "ID", render: (r: T) => String(r.id ?? "—") },
     {
       header: "Preview",
