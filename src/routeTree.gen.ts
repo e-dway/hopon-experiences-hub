@@ -9,38 +9,194 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TagsRouteImport } from './routes/tags'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PoisRouteImport } from './routes/pois'
+import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as ItinerariesRouteImport } from './routes/itineraries'
+import { Route as ExperiencesRouteImport } from './routes/experiences'
+import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ExperiencesIdRouteImport } from './routes/experiences.$id'
 
+const TagsRoute = TagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoisRoute = PoisRouteImport.update({
+  id: '/pois',
+  path: '/pois',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackagesRoute = PackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItinerariesRoute = ItinerariesRouteImport.update({
+  id: '/itineraries',
+  path: '/itineraries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExperiencesRoute = ExperiencesRouteImport.update({
+  id: '/experiences',
+  path: '/experiences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExperiencesIdRoute = ExperiencesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ExperiencesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/experiences': typeof ExperiencesRouteWithChildren
+  '/itineraries': typeof ItinerariesRoute
+  '/packages': typeof PackagesRoute
+  '/pois': typeof PoisRoute
+  '/settings': typeof SettingsRoute
+  '/tags': typeof TagsRoute
+  '/experiences/$id': typeof ExperiencesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/experiences': typeof ExperiencesRouteWithChildren
+  '/itineraries': typeof ItinerariesRoute
+  '/packages': typeof PackagesRoute
+  '/pois': typeof PoisRoute
+  '/settings': typeof SettingsRoute
+  '/tags': typeof TagsRoute
+  '/experiences/$id': typeof ExperiencesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/experiences': typeof ExperiencesRouteWithChildren
+  '/itineraries': typeof ItinerariesRoute
+  '/packages': typeof PackagesRoute
+  '/pois': typeof PoisRoute
+  '/settings': typeof SettingsRoute
+  '/tags': typeof TagsRoute
+  '/experiences/$id': typeof ExperiencesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/bookings'
+    | '/experiences'
+    | '/itineraries'
+    | '/packages'
+    | '/pois'
+    | '/settings'
+    | '/tags'
+    | '/experiences/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/bookings'
+    | '/experiences'
+    | '/itineraries'
+    | '/packages'
+    | '/pois'
+    | '/settings'
+    | '/tags'
+    | '/experiences/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/bookings'
+    | '/experiences'
+    | '/itineraries'
+    | '/packages'
+    | '/pois'
+    | '/settings'
+    | '/tags'
+    | '/experiences/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookingsRoute: typeof BookingsRoute
+  ExperiencesRoute: typeof ExperiencesRouteWithChildren
+  ItinerariesRoute: typeof ItinerariesRoute
+  PackagesRoute: typeof PackagesRoute
+  PoisRoute: typeof PoisRoute
+  SettingsRoute: typeof SettingsRoute
+  TagsRoute: typeof TagsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tags': {
+      id: '/tags'
+      path: '/tags'
+      fullPath: '/tags'
+      preLoaderRoute: typeof TagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pois': {
+      id: '/pois'
+      path: '/pois'
+      fullPath: '/pois'
+      preLoaderRoute: typeof PoisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packages': {
+      id: '/packages'
+      path: '/packages'
+      fullPath: '/packages'
+      preLoaderRoute: typeof PackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/itineraries': {
+      id: '/itineraries'
+      path: '/itineraries'
+      fullPath: '/itineraries'
+      preLoaderRoute: typeof ItinerariesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/experiences': {
+      id: '/experiences'
+      path: '/experiences'
+      fullPath: '/experiences'
+      preLoaderRoute: typeof ExperiencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +204,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/experiences/$id': {
+      id: '/experiences/$id'
+      path: '/$id'
+      fullPath: '/experiences/$id'
+      preLoaderRoute: typeof ExperiencesIdRouteImport
+      parentRoute: typeof ExperiencesRoute
+    }
   }
 }
 
+interface ExperiencesRouteChildren {
+  ExperiencesIdRoute: typeof ExperiencesIdRoute
+}
+
+const ExperiencesRouteChildren: ExperiencesRouteChildren = {
+  ExperiencesIdRoute: ExperiencesIdRoute,
+}
+
+const ExperiencesRouteWithChildren = ExperiencesRoute._addFileChildren(
+  ExperiencesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookingsRoute: BookingsRoute,
+  ExperiencesRoute: ExperiencesRouteWithChildren,
+  ItinerariesRoute: ItinerariesRoute,
+  PackagesRoute: PackagesRoute,
+  PoisRoute: PoisRoute,
+  SettingsRoute: SettingsRoute,
+  TagsRoute: TagsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
