@@ -17,7 +17,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { GalleryDropzone, type GalleryItem } from "@/components/GalleryDropzone";
-import { Pencil } from "lucide-react";
+import { Pencil, Search } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 
 export const Route = createFileRoute("/pois")({
   component: PoisPage,
