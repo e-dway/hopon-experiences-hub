@@ -17,6 +17,7 @@ import { Route as ItinerariesRouteImport } from './routes/itineraries'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ItinerariesIdRouteImport } from './routes/itineraries.$id'
 import { Route as ExperiencesIdRouteImport } from './routes/experiences.$id'
 
 const TagsRoute = TagsRouteImport.update({
@@ -59,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ItinerariesIdRoute = ItinerariesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ItinerariesRoute,
+} as any)
 const ExperiencesIdRoute = ExperiencesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -69,35 +75,38 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
   '/experiences': typeof ExperiencesRouteWithChildren
-  '/itineraries': typeof ItinerariesRoute
+  '/itineraries': typeof ItinerariesRouteWithChildren
   '/packages': typeof PackagesRoute
   '/pois': typeof PoisRoute
   '/settings': typeof SettingsRoute
   '/tags': typeof TagsRoute
   '/experiences/$id': typeof ExperiencesIdRoute
+  '/itineraries/$id': typeof ItinerariesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
   '/experiences': typeof ExperiencesRouteWithChildren
-  '/itineraries': typeof ItinerariesRoute
+  '/itineraries': typeof ItinerariesRouteWithChildren
   '/packages': typeof PackagesRoute
   '/pois': typeof PoisRoute
   '/settings': typeof SettingsRoute
   '/tags': typeof TagsRoute
   '/experiences/$id': typeof ExperiencesIdRoute
+  '/itineraries/$id': typeof ItinerariesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
   '/experiences': typeof ExperiencesRouteWithChildren
-  '/itineraries': typeof ItinerariesRoute
+  '/itineraries': typeof ItinerariesRouteWithChildren
   '/packages': typeof PackagesRoute
   '/pois': typeof PoisRoute
   '/settings': typeof SettingsRoute
   '/tags': typeof TagsRoute
   '/experiences/$id': typeof ExperiencesIdRoute
+  '/itineraries/$id': typeof ItinerariesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tags'
     | '/experiences/$id'
+    | '/itineraries/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tags'
     | '/experiences/$id'
+    | '/itineraries/$id'
   id:
     | '__root__'
     | '/'
@@ -133,13 +144,14 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tags'
     | '/experiences/$id'
+    | '/itineraries/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BookingsRoute: typeof BookingsRoute
   ExperiencesRoute: typeof ExperiencesRouteWithChildren
-  ItinerariesRoute: typeof ItinerariesRoute
+  ItinerariesRoute: typeof ItinerariesRouteWithChildren
   PackagesRoute: typeof PackagesRoute
   PoisRoute: typeof PoisRoute
   SettingsRoute: typeof SettingsRoute
@@ -204,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/itineraries/$id': {
+      id: '/itineraries/$id'
+      path: '/$id'
+      fullPath: '/itineraries/$id'
+      preLoaderRoute: typeof ItinerariesIdRouteImport
+      parentRoute: typeof ItinerariesRoute
+    }
     '/experiences/$id': {
       id: '/experiences/$id'
       path: '/$id'
@@ -226,11 +245,23 @@ const ExperiencesRouteWithChildren = ExperiencesRoute._addFileChildren(
   ExperiencesRouteChildren,
 )
 
+interface ItinerariesRouteChildren {
+  ItinerariesIdRoute: typeof ItinerariesIdRoute
+}
+
+const ItinerariesRouteChildren: ItinerariesRouteChildren = {
+  ItinerariesIdRoute: ItinerariesIdRoute,
+}
+
+const ItinerariesRouteWithChildren = ItinerariesRoute._addFileChildren(
+  ItinerariesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookingsRoute: BookingsRoute,
   ExperiencesRoute: ExperiencesRouteWithChildren,
-  ItinerariesRoute: ItinerariesRoute,
+  ItinerariesRoute: ItinerariesRouteWithChildren,
   PackagesRoute: PackagesRoute,
   PoisRoute: PoisRoute,
   SettingsRoute: SettingsRoute,
