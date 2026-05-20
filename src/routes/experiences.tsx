@@ -32,12 +32,34 @@ export const Route = createFileRoute("/experiences")({
 function ExperiencesPage() {
   const { settings } = useSettings();
   const owner = settings.owner;
+  const nav = useNavigate();
+  const qc = useQueryClient();
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const emptyForm: Experience = {
+    owner,
+    name: "",
+    description: "",
+    price: 0,
+    duration: "",
+    origin: "",
+  };
+  const [form, setForm] = useState<Experience>(emptyForm);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["experiences", owner],
     queryFn: () => Experiences.list(owner),
     enabled: !!owner,
+  });
+
+  const create = useMutation({
+    mutationFn: (body: Experience) => Experiences.create(body),
+    onSuccess: (created) => {
+      qc.invalidateQueries({ queryKey: ["experiences"] });
+      setOpen(false);
+      setForm({ ...emptyForm, owner });
+      if (created?.id) nav({ to: "/experiences/$id", params: { id: String(created.id) } });
+    },
   });
 
   const filtered = (data || []).filter((e) =>
@@ -54,14 +76,24 @@ function ExperiencesPage() {
       }
       actions={
         owner ? (
-          <div className="relative">
-            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name…"
-              className="pl-9 w-64"
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by name…"
+                className="pl-9 w-64"
+              />
+            </div>
+            <Button
+              onClick={() => {
+                setForm({ ...emptyForm, owner });
+                setOpen(true);
+              }}
+            >
+              <Plus className="size-4" /> Add experience
+            </Button>
           </div>
         ) : null
       }
