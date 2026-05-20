@@ -71,15 +71,25 @@ function TagsPage() {
       title="Tags"
       subtitle={`${data?.length ?? 0} tags across ${Object.keys(grouped).length} families`}
       actions={
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => setEditing({ ...EMPTY })}
-              className="bg-accent text-accent-foreground hover:opacity-90"
-            >
-              <Plus className="size-4 mr-1" /> New tag
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search…"
+              className="pl-9 w-64"
+            />
+          </div>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => setEditing({ ...EMPTY })}
+                className="bg-accent text-accent-foreground hover:opacity-90"
+              >
+                <Plus className="size-4 mr-1" /> New tag
+              </Button>
+            </DialogTrigger>
           {editing && (
             <DialogContent>
               <DialogHeader>
