@@ -11,6 +11,8 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import { useSettings } from "@/lib/settings";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import logoUrl from "@/assets/hopon-logo.png";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -36,6 +38,7 @@ export function AppLayout({ children, title, subtitle, actions }: {
     <div className="min-h-screen flex">
       <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-border bg-sidebar text-sidebar-foreground">
         <div className="px-6 py-6 border-b border-sidebar-border">
+          <img src={logoUrl} alt="Hop on Mobility" className="h-7 w-auto mb-3 dark:brightness-0 dark:invert" />
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Hop on Mobility</div>
           <div className="font-display text-2xl mt-1">Experiences</div>
         </div>
@@ -76,7 +79,7 @@ export function AppLayout({ children, title, subtitle, actions }: {
                 <p className="text-muted-foreground mt-1 text-sm">{subtitle}</p>
               )}
             </div>
-            <div className="flex items-center gap-2">{actions}</div>
+            <div className="flex items-center gap-2">{actions}<ThemeToggle /></div>
           </div>
         </header>
         <div className="px-6 md:px-10 py-8">{children}</div>
