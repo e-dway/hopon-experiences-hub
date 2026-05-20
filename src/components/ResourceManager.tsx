@@ -51,11 +51,13 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
   const [editing, setEditing] = useState<{ id?: number | string; body: string } | null>(null);
   const [open, setOpen] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const c = client as any;
   const save = useMutation({
     mutationFn: async ({ id, body }: { id?: number | string; body: string }) => {
       const parsed = JSON.parse(body);
-      if (id != null && client.update) return client.update(id, parsed);
-      if (client.create) return client.create(parsed);
+      if (id != null && c.update) return c.update(id, parsed);
+      if (c.create) return c.create(parsed);
       throw new Error("No create/update available");
     },
     onSuccess: () => {
@@ -66,7 +68,7 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
   });
   const remove = useMutation({
     mutationFn: (id: number | string) =>
-      client.remove ? client.remove(id) : Promise.reject(new Error("Delete not supported")),
+      c.remove ? c.remove(id) : Promise.reject(new Error("Delete not supported")),
     onSuccess: () => qc.invalidateQueries({ queryKey: [queryKey] }),
   });
 
