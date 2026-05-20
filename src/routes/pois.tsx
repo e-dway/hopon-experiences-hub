@@ -1,14 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { OwnerGate } from "@/components/OwnerGate";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
 import { useSettings } from "@/lib/settings";
-import { Pois } from "@/lib/api";
+import { Pois, type POI } from "@/lib/api";
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { GalleryDropzone, type GalleryItem } from "@/components/GalleryDropzone";
+import { Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/pois")({
   component: PoisPage,
@@ -23,10 +32,35 @@ export const Route = createFileRoute("/pois")({
 function PoisPage() {
   const { settings } = useSettings();
   const owner = settings.owner;
+  const qc = useQueryClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ["pois", owner],
     queryFn: () => Pois.list(owner),
     enabled: !!owner,
+  });
+
+  const [editing, setEditing] = useState<POI | null>(null);
+  const [name, setName] = useState("");
+  const [gallery, setGallery] = useState<Record<string, GalleryItem>>({});
+
+  useEffect(() => {
+    if (editing) {
+      setName(editing.name || "");
+      setGallery(
+        (editing.gallery as Record<string, GalleryItem> | null | undefined) ?? {},
+      );
+    }
+  }, [editing]);
+
+  const update = useMutation({
+    mutationFn: () => {
+      if (!editing?.id) throw new Error("Missing POI id");
+      return Pois.update(editing.id, { ...editing, name, gallery });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pois", owner] });
+      setEditing(null);
+    },
   });
 
   return (
@@ -47,6 +81,7 @@ function PoisPage() {
                   <TableHead>Highlight</TableHead>
                   <TableHead>Tags</TableHead>
                   <TableHead className="text-right">ID</TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -62,6 +97,11 @@ function PoisPage() {
                       ))}
                     </TableCell>
                     <TableCell className="text-right text-xs font-mono text-muted-foreground">{p.id}</TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" onClick={() => setEditing(p)} aria-label="Edit">
+                        <Pencil className="size-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -69,6 +109,30 @@ function PoisPage() {
           </Card>
         )}
       </OwnerGate>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit POI</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="poi-name">Name</Label>
+              <Input id="poi-name" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <GalleryDropzone value={gallery} onChange={setGallery} />
+            {update.isError && (
+              <p className="text-sm text-destructive">{(update.error as Error).message}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button onClick={() => update.mutate()} disabled={update.isPending || !name}>
+              {update.isPending ? "Saving…" : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
