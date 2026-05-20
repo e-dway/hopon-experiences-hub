@@ -18,6 +18,8 @@ import {
 import { useSettings } from "@/lib/settings";
 import { Experiences, type Experience } from "@/lib/api";
 import { Plus, Search } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 
 export const Route = createFileRoute("/experiences")({
   component: ExperiencesPage,
@@ -62,9 +64,17 @@ function ExperiencesPage() {
     },
   });
 
-  const filtered = (data || []).filter((e) =>
-    !q ? true : (e.name || "").toLowerCase().includes(q.toLowerCase())
-  );
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (e) =>
+      !q
+        ? true
+        : (e.name || "").toLowerCase().includes(ql) ||
+          (e.description || "").toLowerCase().includes(ql) ||
+          (e.origin || "").toLowerCase().includes(ql),
+    pageSize: 24,
+  });
 
   return (
     <AppLayout
