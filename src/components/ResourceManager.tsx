@@ -53,6 +53,13 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
 
   const [editing, setEditing] = useState<{ id?: number | string; body: string } | null>(null);
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList<T>({
+    items: data as T[] | undefined,
+    filter: (row) => (!q ? true : JSON.stringify(row).toLowerCase().includes(ql)),
+    pageSize: 40,
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const c = client as any;
