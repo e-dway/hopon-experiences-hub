@@ -1,13 +1,23 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { OwnerGate } from "@/components/OwnerGate";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useSettings } from "@/lib/settings";
-import { Experiences } from "@/lib/api";
-import { Search } from "lucide-react";
+import { Experiences, type Experience } from "@/lib/api";
+import { Plus, Search } from "lucide-react";
 
 export const Route = createFileRoute("/experiences")({
   component: ExperiencesPage,
