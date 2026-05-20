@@ -52,6 +52,7 @@ export interface POI {
   tags?: string[];
   highlight?: boolean | null;
   radius?: number | null;
+  gallery?: Record<string, unknown> | null;
 }
 
 export interface Itinerary {
@@ -66,6 +67,7 @@ export interface Itinerary {
   pois?: Array<number | { id?: number; name?: string }>;
   experiences?: Array<number | { id?: number; name?: string }>;
   tags?: Array<number | { id?: number; name?: string }>;
+  gallery?: Record<string, unknown> | null;
 }
 
 export interface Tag {
