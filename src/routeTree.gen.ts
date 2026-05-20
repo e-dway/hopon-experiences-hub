@@ -9,17 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UtilsRouteImport } from './routes/utils'
+import { Route as UserDataRouteImport } from './routes/user-data'
 import { Route as TagsRouteImport } from './routes/tags'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PoisRouteImport } from './routes/pois'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as ItinerariesRouteImport } from './routes/itineraries'
+import { Route as IncomingRouteImport } from './routes/incoming'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
+import { Route as ConsultantRouteImport } from './routes/consultant'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ItinerariesIdRouteImport } from './routes/itineraries.$id'
 import { Route as ExperiencesIdRouteImport } from './routes/experiences.$id'
 
+const UtilsRoute = UtilsRouteImport.update({
+  id: '/utils',
+  path: '/utils',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserDataRoute = UserDataRouteImport.update({
+  id: '/user-data',
+  path: '/user-data',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TagsRoute = TagsRouteImport.update({
   id: '/tags',
   path: '/tags',
@@ -45,9 +59,19 @@ const ItinerariesRoute = ItinerariesRouteImport.update({
   path: '/itineraries',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IncomingRoute = IncomingRouteImport.update({
+  id: '/incoming',
+  path: '/incoming',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExperiencesRoute = ExperiencesRouteImport.update({
   id: '/experiences',
   path: '/experiences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsultantRoute = ConsultantRouteImport.update({
+  id: '/consultant',
+  path: '/consultant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookingsRoute = BookingsRouteImport.update({
@@ -74,24 +98,32 @@ const ExperiencesIdRoute = ExperiencesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
+  '/consultant': typeof ConsultantRoute
   '/experiences': typeof ExperiencesRouteWithChildren
+  '/incoming': typeof IncomingRoute
   '/itineraries': typeof ItinerariesRouteWithChildren
   '/packages': typeof PackagesRoute
   '/pois': typeof PoisRoute
   '/settings': typeof SettingsRoute
   '/tags': typeof TagsRoute
+  '/user-data': typeof UserDataRoute
+  '/utils': typeof UtilsRoute
   '/experiences/$id': typeof ExperiencesIdRoute
   '/itineraries/$id': typeof ItinerariesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
+  '/consultant': typeof ConsultantRoute
   '/experiences': typeof ExperiencesRouteWithChildren
+  '/incoming': typeof IncomingRoute
   '/itineraries': typeof ItinerariesRouteWithChildren
   '/packages': typeof PackagesRoute
   '/pois': typeof PoisRoute
   '/settings': typeof SettingsRoute
   '/tags': typeof TagsRoute
+  '/user-data': typeof UserDataRoute
+  '/utils': typeof UtilsRoute
   '/experiences/$id': typeof ExperiencesIdRoute
   '/itineraries/$id': typeof ItinerariesIdRoute
 }
@@ -99,12 +131,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bookings': typeof BookingsRoute
+  '/consultant': typeof ConsultantRoute
   '/experiences': typeof ExperiencesRouteWithChildren
+  '/incoming': typeof IncomingRoute
   '/itineraries': typeof ItinerariesRouteWithChildren
   '/packages': typeof PackagesRoute
   '/pois': typeof PoisRoute
   '/settings': typeof SettingsRoute
   '/tags': typeof TagsRoute
+  '/user-data': typeof UserDataRoute
+  '/utils': typeof UtilsRoute
   '/experiences/$id': typeof ExperiencesIdRoute
   '/itineraries/$id': typeof ItinerariesIdRoute
 }
@@ -113,36 +149,48 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/bookings'
+    | '/consultant'
     | '/experiences'
+    | '/incoming'
     | '/itineraries'
     | '/packages'
     | '/pois'
     | '/settings'
     | '/tags'
+    | '/user-data'
+    | '/utils'
     | '/experiences/$id'
     | '/itineraries/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/bookings'
+    | '/consultant'
     | '/experiences'
+    | '/incoming'
     | '/itineraries'
     | '/packages'
     | '/pois'
     | '/settings'
     | '/tags'
+    | '/user-data'
+    | '/utils'
     | '/experiences/$id'
     | '/itineraries/$id'
   id:
     | '__root__'
     | '/'
     | '/bookings'
+    | '/consultant'
     | '/experiences'
+    | '/incoming'
     | '/itineraries'
     | '/packages'
     | '/pois'
     | '/settings'
     | '/tags'
+    | '/user-data'
+    | '/utils'
     | '/experiences/$id'
     | '/itineraries/$id'
   fileRoutesById: FileRoutesById
@@ -150,16 +198,34 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BookingsRoute: typeof BookingsRoute
+  ConsultantRoute: typeof ConsultantRoute
   ExperiencesRoute: typeof ExperiencesRouteWithChildren
+  IncomingRoute: typeof IncomingRoute
   ItinerariesRoute: typeof ItinerariesRouteWithChildren
   PackagesRoute: typeof PackagesRoute
   PoisRoute: typeof PoisRoute
   SettingsRoute: typeof SettingsRoute
   TagsRoute: typeof TagsRoute
+  UserDataRoute: typeof UserDataRoute
+  UtilsRoute: typeof UtilsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/utils': {
+      id: '/utils'
+      path: '/utils'
+      fullPath: '/utils'
+      preLoaderRoute: typeof UtilsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user-data': {
+      id: '/user-data'
+      path: '/user-data'
+      fullPath: '/user-data'
+      preLoaderRoute: typeof UserDataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tags': {
       id: '/tags'
       path: '/tags'
@@ -195,11 +261,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItinerariesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/incoming': {
+      id: '/incoming'
+      path: '/incoming'
+      fullPath: '/incoming'
+      preLoaderRoute: typeof IncomingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/experiences': {
       id: '/experiences'
       path: '/experiences'
       fullPath: '/experiences'
       preLoaderRoute: typeof ExperiencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consultant': {
+      id: '/consultant'
+      path: '/consultant'
+      fullPath: '/consultant'
+      preLoaderRoute: typeof ConsultantRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bookings': {
@@ -260,13 +340,27 @@ const ItinerariesRouteWithChildren = ItinerariesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookingsRoute: BookingsRoute,
+  ConsultantRoute: ConsultantRoute,
   ExperiencesRoute: ExperiencesRouteWithChildren,
+  IncomingRoute: IncomingRoute,
   ItinerariesRoute: ItinerariesRouteWithChildren,
   PackagesRoute: PackagesRoute,
   PoisRoute: PoisRoute,
   SettingsRoute: SettingsRoute,
   TagsRoute: TagsRoute,
+  UserDataRoute: UserDataRoute,
+  UtilsRoute: UtilsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
