@@ -13,6 +13,7 @@ import { useSettings } from "@/lib/settings";
 import {
   Itineraries, Pois, Experiences, type Itinerary, type POI, type Experience,
 } from "@/lib/api";
+import { GalleryDropzone, type GalleryItem } from "@/components/GalleryDropzone";
 
 export const Route = createFileRoute("/itineraries/$id")({
   component: ItineraryDetail,
