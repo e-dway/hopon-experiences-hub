@@ -14,7 +14,9 @@ import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
 } from "@/components/ui/table";
 import { Tags, type Tag } from "@/lib/api";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Search } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 
 export const Route = createFileRoute("/tags")({
   component: TagsPage,
@@ -33,6 +35,17 @@ function TagsPage() {
   const { data, isLoading, error } = useQuery({ queryKey: ["tags"], queryFn: () => Tags.list() });
   const [editing, setEditing] = useState<Tag | null>(null);
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (t) =>
+      !q
+        ? true
+        : (t.name || "").toLowerCase().includes(ql) ||
+          (t.family || "").toLowerCase().includes(ql),
+    pageSize: 60,
+  });
 
   const save = useMutation({
     mutationFn: (t: Tag) => (t.id ? Tags.update(t.id, t) : Tags.create(t)),
@@ -47,7 +60,7 @@ function TagsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
   });
 
-  const grouped = (data || []).reduce<Record<string, Tag[]>>((acc, t) => {
+  const grouped = visible.reduce<Record<string, Tag[]>>((acc, t) => {
     const f = t.family || "—";
     (acc[f] ||= []).push(t);
     return acc;
