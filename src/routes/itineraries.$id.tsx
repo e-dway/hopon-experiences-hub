@@ -71,6 +71,7 @@ function ItineraryDetail() {
         pois: poiIds,
         experiences: expIds,
         tags: toIds(itinerary.tags),
+        gallery,
       };
       return Itineraries.update(id, body);
     },
