@@ -113,6 +113,12 @@ function ExperienceDetail() {
                 onChange={(e) => setForm({ ...form, origin: e.target.value })}
               />
             </div>
+            <div className="pt-2">
+              <GalleryDropzone
+                value={form.gallery as Record<string, { url: string; name?: string }> | null | undefined}
+                onChange={(next) => setForm({ ...form, gallery: next })}
+              />
+            </div>
             <div className="flex items-center gap-3 pt-2">
               <Button
                 onClick={() => update.mutate(form)}
