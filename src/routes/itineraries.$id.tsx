@@ -13,6 +13,7 @@ import { useSettings } from "@/lib/settings";
 import {
   Itineraries, Pois, Experiences, type Itinerary, type POI, type Experience,
 } from "@/lib/api";
+import { GalleryDropzone, type GalleryItem } from "@/components/GalleryDropzone";
 
 export const Route = createFileRoute("/itineraries/$id")({
   component: ItineraryDetail,
@@ -50,11 +51,15 @@ function ItineraryDetail() {
 
   const [poiIds, setPoiIds] = useState<number[]>([]);
   const [expIds, setExpIds] = useState<number[]>([]);
+  const [gallery, setGallery] = useState<Record<string, GalleryItem>>({});
 
   useEffect(() => {
     if (itinerary) {
       setPoiIds(toIds(itinerary.pois));
       setExpIds(toIds(itinerary.experiences));
+      setGallery(
+        (itinerary.gallery as Record<string, GalleryItem> | null | undefined) ?? {},
+      );
     }
   }, [itinerary]);
 
@@ -66,6 +71,7 @@ function ItineraryDetail() {
         pois: poiIds,
         experiences: expIds,
         tags: toIds(itinerary.tags),
+        gallery,
       };
       return Itineraries.update(id, body);
     },
@@ -89,7 +95,9 @@ function ItineraryDetail() {
   const dirty =
     itinerary &&
     (JSON.stringify(poiIds) !== JSON.stringify(toIds(itinerary.pois)) ||
-      JSON.stringify(expIds) !== JSON.stringify(toIds(itinerary.experiences)));
+      JSON.stringify(expIds) !== JSON.stringify(toIds(itinerary.experiences)) ||
+      JSON.stringify(gallery) !==
+        JSON.stringify((itinerary.gallery as Record<string, GalleryItem>) ?? {}));
 
   return (
     <AppLayout
@@ -130,6 +138,10 @@ function ItineraryDetail() {
             byId={expById}
             emptyHint="No experiences linked yet."
           />
+
+          <Card className="p-6 lg:col-span-2">
+            <GalleryDropzone value={gallery} onChange={setGallery} label="Gallery" />
+          </Card>
 
           <div className="lg:col-span-2 flex items-center gap-3">
             <Button onClick={() => save.mutate()} disabled={!dirty || save.isPending}>

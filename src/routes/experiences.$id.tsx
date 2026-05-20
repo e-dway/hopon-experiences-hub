@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Experiences, type Experience } from "@/lib/api";
+import { GalleryDropzone } from "@/components/GalleryDropzone";
 import { ArrowLeft, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/experiences/$id")({
@@ -110,6 +111,12 @@ function ExperienceDetail() {
                 id="origin"
                 value={form.origin || ""}
                 onChange={(e) => setForm({ ...form, origin: e.target.value })}
+              />
+            </div>
+            <div className="pt-2">
+              <GalleryDropzone
+                value={form.gallery as Record<string, { url: string; name?: string }> | null | undefined}
+                onChange={(next) => setForm({ ...form, gallery: next })}
               />
             </div>
             <div className="flex items-center gap-3 pt-2">
