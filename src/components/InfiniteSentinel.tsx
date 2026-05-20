@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 
 interface Props {
-  sentinelRef: RefObject<HTMLDivElement>;
+  sentinelRef: RefObject<HTMLDivElement | null>;
   hasMore: boolean;
   total: number;
   visibleCount: number;
