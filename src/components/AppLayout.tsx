@@ -11,6 +11,8 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import { useSettings } from "@/lib/settings";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import logoUrl from "@/assets/hopon-logo.png";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
