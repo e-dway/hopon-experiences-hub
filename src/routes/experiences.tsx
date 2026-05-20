@@ -163,6 +163,79 @@ function ExperiencesPage() {
           ))}
         </div>
       </OwnerGate>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add experience</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="ne-name">Name</Label>
+              <Input
+                id="ne-name"
+                value={form.name || ""}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ne-desc">Description</Label>
+              <Textarea
+                id="ne-desc"
+                rows={4}
+                value={form.description || ""}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="ne-price">Price (€)</Label>
+                <Input
+                  id="ne-price"
+                  type="number"
+                  step="0.01"
+                  value={form.price ?? 0}
+                  onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="ne-dur">Duration</Label>
+                <Input
+                  id="ne-dur"
+                  placeholder="PT2H30M"
+                  value={form.duration || ""}
+                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="ne-origin">Origin</Label>
+              <Input
+                id="ne-origin"
+                value={form.origin || ""}
+                onChange={(e) => setForm({ ...form, origin: e.target.value })}
+              />
+            </div>
+            {create.isError && (
+              <p className="text-sm text-destructive">
+                {(create.error as Error).message}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => create.mutate({ ...form, owner })}
+              disabled={create.isPending || !form.name}
+            >
+              {create.isPending ? "Creating…" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
+
   );
 }
