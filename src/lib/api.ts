@@ -63,6 +63,9 @@ export interface Itinerary {
   directed?: boolean;
   user?: string | null;
   duration?: string | null;
+  pois?: Array<number | { id?: number; name?: string }>;
+  experiences?: Array<number | { id?: number; name?: string }>;
+  tags?: Array<number | { id?: number; name?: string }>;
 }
 
 export interface Tag {
