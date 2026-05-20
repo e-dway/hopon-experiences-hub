@@ -14,7 +14,9 @@ import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
 } from "@/components/ui/table";
 import { Tags, type Tag } from "@/lib/api";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Search } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 
 export const Route = createFileRoute("/tags")({
   component: TagsPage,
@@ -33,6 +35,17 @@ function TagsPage() {
   const { data, isLoading, error } = useQuery({ queryKey: ["tags"], queryFn: () => Tags.list() });
   const [editing, setEditing] = useState<Tag | null>(null);
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (t) =>
+      !q
+        ? true
+        : (t.name || "").toLowerCase().includes(ql) ||
+          (t.family || "").toLowerCase().includes(ql),
+    pageSize: 60,
+  });
 
   const save = useMutation({
     mutationFn: (t: Tag) => (t.id ? Tags.update(t.id, t) : Tags.create(t)),
@@ -47,7 +60,7 @@ function TagsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tags"] }),
   });
 
-  const grouped = (data || []).reduce<Record<string, Tag[]>>((acc, t) => {
+  const grouped = visible.reduce<Record<string, Tag[]>>((acc, t) => {
     const f = t.family || "—";
     (acc[f] ||= []).push(t);
     return acc;
@@ -58,15 +71,25 @@ function TagsPage() {
       title="Tags"
       subtitle={`${data?.length ?? 0} tags across ${Object.keys(grouped).length} families`}
       actions={
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => setEditing({ ...EMPTY })}
-              className="bg-accent text-accent-foreground hover:opacity-90"
-            >
-              <Plus className="size-4 mr-1" /> New tag
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search…"
+              className="pl-9 w-64"
+            />
+          </div>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => setEditing({ ...EMPTY })}
+                className="bg-accent text-accent-foreground hover:opacity-90"
+              >
+                <Plus className="size-4 mr-1" /> New tag
+              </Button>
+            </DialogTrigger>
           {editing && (
             <DialogContent>
               <DialogHeader>
@@ -109,7 +132,8 @@ function TagsPage() {
               </DialogFooter>
             </DialogContent>
           )}
-        </Dialog>
+          </Dialog>
+        </div>
       }
     >
       {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
@@ -161,6 +185,14 @@ function TagsPage() {
           </section>
         ))}
       </div>
+      {(data?.length ?? 0) > 0 && (
+        <InfiniteSentinel
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          total={total}
+          visibleCount={visible.length}
+        />
+      )}
     </AppLayout>
   );
 }

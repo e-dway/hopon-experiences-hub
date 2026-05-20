@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 import { AppLayout } from "@/components/AppLayout";
 import { OwnerGate } from "@/components/OwnerGate";
 import { Card } from "@/components/ui/card";
@@ -65,6 +67,19 @@ function ItinerariesPage() {
   const [editing, setEditing] = useState<Itinerary | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteTarget, setDeleteTarget] = useState<Itinerary | null>(null);
+  const [q, setQ] = useState("");
+
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (i) =>
+      !q
+        ? true
+        : (i.name || "").toLowerCase().includes(ql) ||
+          (i.category || "").toLowerCase().includes(ql) ||
+          (i.user || "").toLowerCase().includes(ql),
+    pageSize: 50,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -121,9 +136,20 @@ function ItinerariesPage() {
       subtitle={owner ? `Owner: ${owner} • ${data?.length ?? 0} total` : undefined}
       actions={
         owner ? (
-          <Button onClick={openCreate}>
-            <Plus className="size-4" /> Add itinerary
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search…"
+                className="pl-9 w-64"
+              />
+            </div>
+            <Button onClick={openCreate}>
+              <Plus className="size-4" /> Add itinerary
+            </Button>
+          </div>
         ) : null
       }
     >
@@ -135,65 +161,75 @@ function ItinerariesPage() {
           </Card>
         )}
         {data && (
-          <Card className="overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Directed</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((i) => (
-                  <TableRow key={i.id}>
-                    <TableCell className="font-medium">
-                      {i.id != null ? (
-                        <Link
-                          to="/itineraries/$id"
-                          params={{ id: String(i.id) }}
-                          className="hover:text-accent underline-offset-4 hover:underline"
-                        >
-                          {i.name}
-                        </Link>
-                      ) : (
-                        i.name
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{i.category || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground tabular-nums">{i.duration || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{i.user || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{i.directed ? "Yes" : "No"}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="inline-flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(i)} aria-label="Edit">
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteTarget(i)}
-                          aria-label="Delete"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {data.length === 0 && (
+          <>
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
-                      No itineraries yet.
-                    </TableCell>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Directed</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </Card>
+                </TableHeader>
+                <TableBody>
+                  {visible.map((i) => (
+                    <TableRow key={i.id}>
+                      <TableCell className="font-medium">
+                        {i.id != null ? (
+                          <Link
+                            to="/itineraries/$id"
+                            params={{ id: String(i.id) }}
+                            className="hover:text-accent underline-offset-4 hover:underline"
+                          >
+                            {i.name}
+                          </Link>
+                        ) : (
+                          i.name
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{i.category || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground tabular-nums">{i.duration || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{i.user || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{i.directed ? "Yes" : "No"}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="inline-flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openEdit(i)} aria-label="Edit">
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeleteTarget(i)}
+                            aria-label="Delete"
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {total === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                        No itineraries match.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+            {total > 0 && (
+              <InfiniteSentinel
+                sentinelRef={sentinelRef}
+                hasMore={hasMore}
+                total={total}
+                visibleCount={visible.length}
+              />
+            )}
+          </>
         )}
       </OwnerGate>
 

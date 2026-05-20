@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 import { AppLayout } from "@/components/AppLayout";
 import { OwnerGate } from "@/components/OwnerGate";
 import { Card } from "@/components/ui/card";
@@ -49,6 +51,19 @@ function PackagesPage() {
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [q, setQ] = useState("");
+
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (p) =>
+      !q
+        ? true
+        : (p.sku || "").toLowerCase().includes(ql) ||
+          (p.id || "").toLowerCase().includes(ql) ||
+          (p.provider || "").toLowerCase().includes(ql),
+    pageSize: 30,
+  });
 
   const create = useMutation({
     mutationFn: () => {
@@ -79,9 +94,20 @@ function PackagesPage() {
       subtitle={owner ? `Owner: ${owner} • ${data?.length ?? 0} total` : undefined}
       actions={
         owner ? (
-          <Button onClick={() => { setForm(emptyForm); setOpen(true); }}>
-            <Plus className="size-4" /> Add package
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search…"
+                className="pl-9 w-64"
+              />
+            </div>
+            <Button onClick={() => { setForm(emptyForm); setOpen(true); }}>
+              <Plus className="size-4" /> Add package
+            </Button>
+          </div>
         ) : null
       }
     >
@@ -93,7 +119,7 @@ function PackagesPage() {
           </Card>
         )}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data?.map((p) => (
+          {visible.map((p) => (
             <Card key={p.id} className="overflow-hidden">
               {p.image && (
                 <div className="aspect-[16/9] bg-sand overflow-hidden">
@@ -117,6 +143,14 @@ function PackagesPage() {
             </Card>
           ))}
         </div>
+        {data && total > 0 && (
+          <InfiniteSentinel
+            sentinelRef={sentinelRef}
+            hasMore={hasMore}
+            total={total}
+            visibleCount={visible.length}
+          />
+        )}
       </OwnerGate>
 
       <Dialog open={open} onOpenChange={setOpen}>

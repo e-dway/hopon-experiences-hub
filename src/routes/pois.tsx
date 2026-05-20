@@ -17,7 +17,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { GalleryDropzone, type GalleryItem } from "@/components/GalleryDropzone";
-import { Pencil } from "lucide-react";
+import { Pencil, Search } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 
 export const Route = createFileRoute("/pois")({
   component: PoisPage,
@@ -42,6 +44,18 @@ function PoisPage() {
   const [editing, setEditing] = useState<POI | null>(null);
   const [name, setName] = useState("");
   const [gallery, setGallery] = useState<Record<string, GalleryItem>>({});
+  const [q, setQ] = useState("");
+
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (p) =>
+      !q
+        ? true
+        : (p.name || "").toLowerCase().includes(ql) ||
+          (p.tags || []).some((t) => t.toLowerCase().includes(ql)),
+    pageSize: 50,
+  });
 
   useEffect(() => {
     if (editing) {
@@ -64,7 +78,23 @@ function PoisPage() {
   });
 
   return (
-    <AppLayout title="Points of interest" subtitle={owner ? `Owner: ${owner} • ${data?.length ?? 0} total` : undefined}>
+    <AppLayout
+      title="Points of interest"
+      subtitle={owner ? `Owner: ${owner} • ${data?.length ?? 0} total` : undefined}
+      actions={
+        owner ? (
+          <div className="relative">
+            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search name or tag…"
+              className="pl-9 w-64"
+            />
+          </div>
+        ) : null
+      }
+    >
       <OwnerGate>
         {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {error && (
@@ -73,40 +103,57 @@ function PoisPage() {
           </Card>
         )}
         {data && (
-          <Card className="overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Highlight</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead className="text-right">ID</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell>
-                      {p.highlight ? <Badge className="bg-accent text-accent-foreground">★</Badge> : <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell className="space-x-1">
-                      {(p.tags || []).slice(0, 4).map((t) => (
-                        <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{t}</span>
-                      ))}
-                    </TableCell>
-                    <TableCell className="text-right text-xs font-mono text-muted-foreground">{p.id}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" onClick={() => setEditing(p)} aria-label="Edit">
-                        <Pencil className="size-4" />
-                      </Button>
-                    </TableCell>
+          <>
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Highlight</TableHead>
+                    <TableHead>Tags</TableHead>
+                    <TableHead className="text-right">ID</TableHead>
+                    <TableHead className="w-12"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+                </TableHeader>
+                <TableBody>
+                  {visible.map((p) => (
+                    <TableRow key={p.id}>
+                      <TableCell className="font-medium">{p.name}</TableCell>
+                      <TableCell>
+                        {p.highlight ? <Badge className="bg-accent text-accent-foreground">★</Badge> : <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                      <TableCell className="space-x-1">
+                        {(p.tags || []).slice(0, 4).map((t) => (
+                          <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{t}</span>
+                        ))}
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-mono text-muted-foreground">{p.id}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => setEditing(p)} aria-label="Edit">
+                          <Pencil className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {total === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">
+                        No POIs match.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+            {total > 0 && (
+              <InfiniteSentinel
+                sentinelRef={sentinelRef}
+                hasMore={hasMore}
+                total={total}
+                visibleCount={visible.length}
+              />
+            )}
+          </>
         )}
       </OwnerGate>
 

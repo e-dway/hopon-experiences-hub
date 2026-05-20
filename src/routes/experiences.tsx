@@ -18,6 +18,8 @@ import {
 import { useSettings } from "@/lib/settings";
 import { Experiences, type Experience } from "@/lib/api";
 import { Plus, Search } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 
 export const Route = createFileRoute("/experiences")({
   component: ExperiencesPage,
@@ -62,9 +64,17 @@ function ExperiencesPage() {
     },
   });
 
-  const filtered = (data || []).filter((e) =>
-    !q ? true : (e.name || "").toLowerCase().includes(q.toLowerCase())
-  );
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (e) =>
+      !q
+        ? true
+        : (e.name || "").toLowerCase().includes(ql) ||
+          (e.description || "").toLowerCase().includes(ql) ||
+          (e.origin || "").toLowerCase().includes(ql),
+    pageSize: 24,
+  });
 
   return (
     <AppLayout
@@ -105,11 +115,11 @@ function ExperiencesPage() {
             {(error as Error).message}
           </Card>
         )}
-        {data && filtered.length === 0 && (
+        {data && total === 0 && (
           <p className="text-sm text-muted-foreground">No experiences found.</p>
         )}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((e) => (
+          {visible.map((e) => (
             <Link
               key={e.id}
               to="/experiences/$id"
@@ -162,6 +172,14 @@ function ExperiencesPage() {
             </Link>
           ))}
         </div>
+        {data && total > 0 && (
+          <InfiniteSentinel
+            sentinelRef={sentinelRef}
+            hasMore={hasMore}
+            total={total}
+            visibleCount={visible.length}
+          />
+        )}
       </OwnerGate>
 
       <Dialog open={open} onOpenChange={setOpen}>

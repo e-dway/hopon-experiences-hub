@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
@@ -9,7 +10,9 @@ import {
 import {
   Table, TableHeader, TableBody, TableHead, TableRow, TableCell,
 } from "@/components/ui/table";
-import { Pencil, Trash2, Plus, RefreshCw } from "lucide-react";
+import { Pencil, Trash2, Plus, RefreshCw, Search } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 
 export interface ResourceClient<T> {
   list: (params?: Record<string, unknown>) => Promise<T[]>;
@@ -50,6 +53,13 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
 
   const [editing, setEditing] = useState<{ id?: number | string; body: string } | null>(null);
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList<T>({
+    items: data as T[] | undefined,
+    filter: (row) => (!q ? true : JSON.stringify(row).toLowerCase().includes(ql)),
+    pageSize: 40,
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const c = client as any;
@@ -86,7 +96,17 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-between items-center gap-2">
+        <div className="relative">
+          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Filter…"
+            className="pl-9 w-64 h-8 text-sm"
+          />
+        </div>
+        <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
           <RefreshCw className={`size-3.5 mr-1 ${isFetching ? "animate-spin" : ""}`} /> Refresh
         </Button>
@@ -129,6 +149,7 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
             )}
           </Dialog>
         )}
+        </div>
       </div>
 
       {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
@@ -150,7 +171,7 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data!.map((row, i) => (
+              {visible.map((row, i) => (
                 <TableRow key={(row.id as string | number | undefined) ?? i}>
                   {cols.map((c, ci) => <TableCell key={c.key ?? ci}>{c.render(row)}</TableCell>)}
                   <TableCell className="text-right space-x-1">
@@ -186,6 +207,14 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
             </TableBody>
           </Table>
         </Card>
+      )}
+      {(data?.length ?? 0) > 0 && total > 0 && (
+        <InfiniteSentinel
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          total={total}
+          visibleCount={visible.length}
+        />
       )}
     </div>
   );
