@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Experiences, type Experience } from "@/lib/api";
+import { GalleryDropzone } from "@/components/GalleryDropzone";
 import { ArrowLeft, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/experiences/$id")({
