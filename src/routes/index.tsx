@@ -157,7 +157,6 @@ function Dashboard() {
           </>
         );
       })()}
-      </div>
     </AppLayout>
   );
 }
