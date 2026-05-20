@@ -93,60 +93,70 @@ function Dashboard() {
         </Card>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat to="/experiences" label="Experiences" Icon={Compass}
-          value={exp.data?.length ?? 0} loading={!!owner && exp.isLoading} />
-        <Stat to="/pois" label="Points of interest" Icon={MapPin}
-          value={pois.data?.length ?? 0} loading={!!owner && pois.isLoading} />
-        <Stat to="/itineraries" label="Itineraries" Icon={RouteIcon}
-          value={its.data?.length ?? 0} loading={!!owner && its.isLoading} />
-        <Stat to="/tags" label="Tags" Icon={TagIcon}
-          value={tags.data?.length ?? 0} loading={tags.isLoading} />
-      </div>
+      {(() => {
+        const expList = Array.isArray(exp.data) ? exp.data : [];
+        const poisList = Array.isArray(pois.data) ? pois.data : [];
+        const itsList = Array.isArray(its.data) ? its.data : [];
+        const tagsList = Array.isArray(tags.data) ? tags.data : [];
+        return (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat to="/experiences" label="Experiences" Icon={Compass}
+                value={expList.length} loading={!!owner && exp.isLoading} />
+              <Stat to="/pois" label="Points of interest" Icon={MapPin}
+                value={poisList.length} loading={!!owner && pois.isLoading} />
+              <Stat to="/itineraries" label="Itineraries" Icon={RouteIcon}
+                value={itsList.length} loading={!!owner && its.isLoading} />
+              <Stat to="/tags" label="Tags" Icon={TagIcon}
+                value={tagsList.length} loading={tags.isLoading} />
+            </div>
 
-      <div className="grid gap-6 mt-10 lg:grid-cols-2">
-        <Card className="p-6">
-          <h3 className="font-display text-xl mb-4">Recent experiences</h3>
-          {exp.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {!owner && <p className="text-sm text-muted-foreground">Set an owner to load.</p>}
-          {exp.data && exp.data.length === 0 && (
-            <p className="text-sm text-muted-foreground">None yet.</p>
-          )}
-          <ul className="divide-y divide-border">
-            {exp.data?.slice(0, 6).map((e) => (
-              <li key={e.id} className="py-3 flex items-center justify-between gap-3">
-                <Link
-                  to="/experiences/$id"
-                  params={{ id: String(e.id) }}
-                  className="text-sm hover:text-accent truncate"
-                >
-                  {e.name || `Experience #${e.id}`}
-                </Link>
-                <span className="text-xs text-muted-foreground tabular-nums">
-                  {e.price ? `€${e.price}` : "—"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Card>
+            <div className="grid gap-6 mt-10 lg:grid-cols-2">
+              <Card className="p-6">
+                <h3 className="font-display text-xl mb-4">Recent experiences</h3>
+                {exp.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+                {!owner && <p className="text-sm text-muted-foreground">Set an owner to load.</p>}
+                {exp.data && expList.length === 0 && (
+                  <p className="text-sm text-muted-foreground">None yet.</p>
+                )}
+                <ul className="divide-y divide-border">
+                  {expList.slice(0, 6).map((e) => (
+                    <li key={e.id} className="py-3 flex items-center justify-between gap-3">
+                      <Link
+                        to="/experiences/$id"
+                        params={{ id: String(e.id) }}
+                        className="text-sm hover:text-accent truncate"
+                      >
+                        {e.name || `Experience #${e.id}`}
+                      </Link>
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {e.price ? `€${e.price}` : "—"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
 
-        <Card className="p-6">
-          <h3 className="font-display text-xl mb-4">Tag families</h3>
-          {tags.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
-          <div className="flex flex-wrap gap-2">
-            {Array.from(new Set((tags.data || []).map((t) => t.family || "other")))
-              .slice(0, 30)
-              .map((f) => (
-                <span
-                  key={f}
-                  className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground"
-                >
-                  {f}
-                </span>
-              ))}
-          </div>
-        </Card>
-      </div>
+              <Card className="p-6">
+                <h3 className="font-display text-xl mb-4">Tag families</h3>
+                {tags.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(new Set(tagsList.map((t) => t.family || "other")))
+                    .slice(0, 30)
+                    .map((f) => (
+                      <span
+                        key={f}
+                        className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground"
+                      >
+                        {f}
+                      </span>
+                    ))}
+                </div>
+              </Card>
+            </div>
+          </>
+        );
+      })()}
     </AppLayout>
   );
 }
