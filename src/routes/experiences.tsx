@@ -1,13 +1,23 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { OwnerGate } from "@/components/OwnerGate";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useSettings } from "@/lib/settings";
-import { Experiences } from "@/lib/api";
-import { Search } from "lucide-react";
+import { Experiences, type Experience } from "@/lib/api";
+import { Plus, Search } from "lucide-react";
 
 export const Route = createFileRoute("/experiences")({
   component: ExperiencesPage,
@@ -22,12 +32,34 @@ export const Route = createFileRoute("/experiences")({
 function ExperiencesPage() {
   const { settings } = useSettings();
   const owner = settings.owner;
+  const nav = useNavigate();
+  const qc = useQueryClient();
   const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const emptyForm: Experience = {
+    owner,
+    name: "",
+    description: "",
+    price: 0,
+    duration: "",
+    origin: "",
+  };
+  const [form, setForm] = useState<Experience>(emptyForm);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["experiences", owner],
     queryFn: () => Experiences.list(owner),
     enabled: !!owner,
+  });
+
+  const create = useMutation({
+    mutationFn: (body: Experience) => Experiences.create(body),
+    onSuccess: (created) => {
+      qc.invalidateQueries({ queryKey: ["experiences"] });
+      setOpen(false);
+      setForm({ ...emptyForm, owner });
+      if (created?.id) nav({ to: "/experiences/$id", params: { id: String(created.id) } });
+    },
   });
 
   const filtered = (data || []).filter((e) =>
@@ -44,14 +76,24 @@ function ExperiencesPage() {
       }
       actions={
         owner ? (
-          <div className="relative">
-            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name…"
-              className="pl-9 w-64"
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by name…"
+                className="pl-9 w-64"
+              />
+            </div>
+            <Button
+              onClick={() => {
+                setForm({ ...emptyForm, owner });
+                setOpen(true);
+              }}
+            >
+              <Plus className="size-4" /> Add experience
+            </Button>
           </div>
         ) : null
       }
@@ -121,6 +163,79 @@ function ExperiencesPage() {
           ))}
         </div>
       </OwnerGate>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add experience</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="ne-name">Name</Label>
+              <Input
+                id="ne-name"
+                value={form.name || ""}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ne-desc">Description</Label>
+              <Textarea
+                id="ne-desc"
+                rows={4}
+                value={form.description || ""}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="ne-price">Price (€)</Label>
+                <Input
+                  id="ne-price"
+                  type="number"
+                  step="0.01"
+                  value={form.price ?? 0}
+                  onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="ne-dur">Duration</Label>
+                <Input
+                  id="ne-dur"
+                  placeholder="PT2H30M"
+                  value={form.duration || ""}
+                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="ne-origin">Origin</Label>
+              <Input
+                id="ne-origin"
+                value={form.origin || ""}
+                onChange={(e) => setForm({ ...form, origin: e.target.value })}
+              />
+            </div>
+            {create.isError && (
+              <p className="text-sm text-destructive">
+                {(create.error as Error).message}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => create.mutate({ ...form, owner })}
+              disabled={create.isPending || !form.name}
+            >
+              {create.isPending ? "Creating…" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
+
   );
 }
