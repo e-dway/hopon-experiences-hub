@@ -134,6 +134,8 @@ export const Tags = {
 export const Packages = {
   list: (owner: string) => api.get<Pkg[]>(`/packages/?owner=${encodeURIComponent(owner)}`),
   get: (id: string) => api.get<Pkg>(`/packages/${id}`),
+  create: (body: Pkg) => api.post<Pkg>(`/packages/`, body),
+  update: (id: string, body: Pkg) => api.put<Pkg>(`/packages/${id}`, body),
   remove: (id: string) => api.del<unknown>(`/packages/${id}`),
 };
 

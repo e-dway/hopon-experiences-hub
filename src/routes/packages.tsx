@@ -1,10 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Plus } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { OwnerGate } from "@/components/OwnerGate";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { useSettings } from "@/lib/settings";
-import { Packages } from "@/lib/api";
+import { Packages, type Pkg } from "@/lib/api";
 
 export const Route = createFileRoute("/packages")({
   component: PackagesPage,
@@ -16,17 +25,66 @@ export const Route = createFileRoute("/packages")({
   }),
 });
 
+const emptyForm = {
+  id: "",
+  sku: "",
+  image: "",
+  price: "",
+  currency: "eur",
+  provider: "",
+  provider_id: "",
+  in_app_visible: true,
+};
+
 function PackagesPage() {
   const { settings } = useSettings();
   const owner = settings.owner;
+  const qc = useQueryClient();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["packages", owner],
     queryFn: () => Packages.list(owner),
     enabled: !!owner,
   });
 
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+
+  const create = useMutation({
+    mutationFn: () => {
+      const body: Pkg = {
+        id: form.id.trim(),
+        owner,
+        sku: form.sku.trim() || null,
+        image: form.image.trim() || null,
+        price: form.price === "" ? 0 : Number(form.price),
+        currency: form.currency.trim() || "eur",
+        provider: form.provider.trim() || null,
+        provider_id: form.provider_id.trim() || null,
+        in_app_visible: form.in_app_visible,
+        strings: {},
+      };
+      return Packages.create(body);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["packages", owner] });
+      setOpen(false);
+      setForm(emptyForm);
+    },
+  });
+
   return (
-    <AppLayout title="Packages" subtitle={owner ? `Owner: ${owner} • ${data?.length ?? 0} total` : undefined}>
+    <AppLayout
+      title="Packages"
+      subtitle={owner ? `Owner: ${owner} • ${data?.length ?? 0} total` : undefined}
+      actions={
+        owner ? (
+          <Button onClick={() => { setForm(emptyForm); setOpen(true); }}>
+            <Plus className="size-4" /> Add package
+          </Button>
+        ) : null
+      }
+    >
       <OwnerGate>
         {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {error && (
@@ -60,6 +118,74 @@ function PackagesPage() {
           ))}
         </div>
       </OwnerGate>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add package</DialogTitle>
+            <DialogDescription>
+              Scoped to owner <span className="font-mono">{owner}</span>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="pkg-id">ID</Label>
+                <Input id="pkg-id" value={form.id}
+                  onChange={(e) => setForm((f) => ({ ...f, id: e.target.value }))}
+                  placeholder="unique-id" />
+              </div>
+              <div>
+                <Label htmlFor="pkg-sku">SKU</Label>
+                <Input id="pkg-sku" value={form.sku}
+                  onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))} />
+              </div>
+              <div>
+                <Label htmlFor="pkg-price">Price</Label>
+                <Input id="pkg-price" type="number" step="0.01" value={form.price}
+                  onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} />
+              </div>
+              <div>
+                <Label htmlFor="pkg-currency">Currency</Label>
+                <Input id="pkg-currency" value={form.currency}
+                  onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))} />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="pkg-image">Image URL</Label>
+                <Input id="pkg-image" value={form.image}
+                  onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))} />
+              </div>
+              <div>
+                <Label htmlFor="pkg-provider">Provider</Label>
+                <Input id="pkg-provider" value={form.provider}
+                  onChange={(e) => setForm((f) => ({ ...f, provider: e.target.value }))} />
+              </div>
+              <div>
+                <Label htmlFor="pkg-pid">Provider ID</Label>
+                <Input id="pkg-pid" value={form.provider_id}
+                  onChange={(e) => setForm((f) => ({ ...f, provider_id: e.target.value }))} />
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch id="pkg-visible" checked={form.in_app_visible}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, in_app_visible: v }))} />
+              <Label htmlFor="pkg-visible">Visible in app</Label>
+            </div>
+            {create.error && (
+              <p className="text-sm text-destructive">{(create.error as Error).message}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => create.mutate()}
+              disabled={!form.id.trim() || create.isPending}
+            >
+              {create.isPending ? "Creating…" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
