@@ -96,7 +96,17 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-between items-center gap-2">
+        <div className="relative">
+          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Filter…"
+            className="pl-9 w-64 h-8 text-sm"
+          />
+        </div>
+        <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
           <RefreshCw className={`size-3.5 mr-1 ${isFetching ? "animate-spin" : ""}`} /> Refresh
         </Button>
@@ -139,6 +149,7 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
             )}
           </Dialog>
         )}
+        </div>
       </div>
 
       {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
@@ -160,7 +171,7 @@ export function ResourceManager<T extends { id?: number | string; [k: string]: u
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data!.map((row, i) => (
+              {visible.map((row, i) => (
                 <TableRow key={(row.id as string | number | undefined) ?? i}>
                   {cols.map((c, ci) => <TableCell key={c.key ?? ci}>{c.render(row)}</TableCell>)}
                   <TableCell className="text-right space-x-1">
