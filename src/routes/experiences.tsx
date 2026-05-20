@@ -115,11 +115,11 @@ function ExperiencesPage() {
             {(error as Error).message}
           </Card>
         )}
-        {data && filtered.length === 0 && (
+        {data && total === 0 && (
           <p className="text-sm text-muted-foreground">No experiences found.</p>
         )}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((e) => (
+          {visible.map((e) => (
             <Link
               key={e.id}
               to="/experiences/$id"
@@ -172,6 +172,14 @@ function ExperiencesPage() {
             </Link>
           ))}
         </div>
+        {data && total > 0 && (
+          <InfiniteSentinel
+            sentinelRef={sentinelRef}
+            hasMore={hasMore}
+            total={total}
+            visibleCount={visible.length}
+          />
+        )}
       </OwnerGate>
 
       <Dialog open={open} onOpenChange={setOpen}>
