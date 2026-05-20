@@ -9,6 +9,10 @@ import {
   Tag as TagIcon,
   CalendarRange,
   Settings as SettingsIcon,
+  Image as ImageIcon,
+  Webhook,
+  Sparkles,
+  Users,
 } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -22,6 +26,10 @@ const nav = [
   { to: "/packages", label: "Packages", icon: Package },
   { to: "/tags", label: "Tags", icon: TagIcon },
   { to: "/bookings", label: "Bookings", icon: CalendarRange },
+  { to: "/utils", label: "Map assets", icon: ImageIcon },
+  { to: "/incoming", label: "Integrations", icon: Webhook },
+  { to: "/consultant", label: "Consultant", icon: Sparkles },
+  { to: "/user-data", label: "User data", icon: Users },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
