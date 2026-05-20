@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { InfiniteSentinel } from "@/components/InfiniteSentinel";
 import { AppLayout } from "@/components/AppLayout";
 import { OwnerGate } from "@/components/OwnerGate";
 import { Card } from "@/components/ui/card";
@@ -65,6 +67,19 @@ function ItinerariesPage() {
   const [editing, setEditing] = useState<Itinerary | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [deleteTarget, setDeleteTarget] = useState<Itinerary | null>(null);
+  const [q, setQ] = useState("");
+
+  const ql = q.toLowerCase();
+  const { visible, total, hasMore, sentinelRef } = useInfiniteList({
+    items: data,
+    filter: (i) =>
+      !q
+        ? true
+        : (i.name || "").toLowerCase().includes(ql) ||
+          (i.category || "").toLowerCase().includes(ql) ||
+          (i.user || "").toLowerCase().includes(ql),
+    pageSize: 50,
+  });
 
   useEffect(() => {
     if (!open) return;
