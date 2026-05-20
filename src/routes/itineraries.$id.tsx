@@ -139,6 +139,10 @@ function ItineraryDetail() {
             emptyHint="No experiences linked yet."
           />
 
+          <Card className="p-6 lg:col-span-2">
+            <GalleryDropzone value={gallery} onChange={setGallery} label="Gallery" />
+          </Card>
+
           <div className="lg:col-span-2 flex items-center gap-3">
             <Button onClick={() => save.mutate()} disabled={!dirty || save.isPending}>
               {save.isPending ? "Saving…" : "Save changes"}
