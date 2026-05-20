@@ -51,11 +51,15 @@ function ItineraryDetail() {
 
   const [poiIds, setPoiIds] = useState<number[]>([]);
   const [expIds, setExpIds] = useState<number[]>([]);
+  const [gallery, setGallery] = useState<Record<string, GalleryItem>>({});
 
   useEffect(() => {
     if (itinerary) {
       setPoiIds(toIds(itinerary.pois));
       setExpIds(toIds(itinerary.experiences));
+      setGallery(
+        (itinerary.gallery as Record<string, GalleryItem> | null | undefined) ?? {},
+      );
     }
   }, [itinerary]);
 
