@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
@@ -150,7 +150,19 @@ function ItinerariesPage() {
               <TableBody>
                 {data.map((i) => (
                   <TableRow key={i.id}>
-                    <TableCell className="font-medium">{i.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {i.id != null ? (
+                        <Link
+                          to="/itineraries/$id"
+                          params={{ id: String(i.id) }}
+                          className="hover:text-accent underline-offset-4 hover:underline"
+                        >
+                          {i.name}
+                        </Link>
+                      ) : (
+                        i.name
+                      )}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{i.category || "—"}</TableCell>
                     <TableCell className="text-muted-foreground tabular-nums">{i.duration || "—"}</TableCell>
                     <TableCell className="text-muted-foreground">{i.user || "—"}</TableCell>
