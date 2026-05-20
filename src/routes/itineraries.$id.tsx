@@ -95,7 +95,9 @@ function ItineraryDetail() {
   const dirty =
     itinerary &&
     (JSON.stringify(poiIds) !== JSON.stringify(toIds(itinerary.pois)) ||
-      JSON.stringify(expIds) !== JSON.stringify(toIds(itinerary.experiences)));
+      JSON.stringify(expIds) !== JSON.stringify(toIds(itinerary.experiences)) ||
+      JSON.stringify(gallery) !==
+        JSON.stringify((itinerary.gallery as Record<string, GalleryItem>) ?? {}));
 
   return (
     <AppLayout
