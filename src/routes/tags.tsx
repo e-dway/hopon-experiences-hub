@@ -132,7 +132,8 @@ function TagsPage() {
               </DialogFooter>
             </DialogContent>
           )}
-        </Dialog>
+          </Dialog>
+        </div>
       }
     >
       {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
@@ -184,6 +185,14 @@ function TagsPage() {
           </section>
         ))}
       </div>
+      {(data?.length ?? 0) > 0 && (
+        <InfiniteSentinel
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          total={total}
+          visibleCount={visible.length}
+        />
+      )}
     </AppLayout>
   );
 }
