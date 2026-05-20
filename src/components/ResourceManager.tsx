@@ -13,15 +13,22 @@ import { Pencil, Trash2, Plus, RefreshCw } from "lucide-react";
 
 export interface ResourceClient<T> {
   list: (params?: Record<string, unknown>) => Promise<T[]>;
-  create?: (body: unknown) => Promise<unknown>;
-  update?: (id: number | string, body: unknown) => Promise<unknown>;
-  remove?: (id: number | string) => Promise<unknown>;
+  create?: (body: never) => Promise<unknown>;
+  update?: (id: never, body: never) => Promise<unknown>;
+  remove?: (id: never) => Promise<unknown>;
+}
+
+interface Column<T> {
+  header: string;
+  render: (row: T) => React.ReactNode;
+  key?: string;
 }
 
 interface Props<T extends { id?: number | string }> {
   queryKey: string;
-  client: ResourceClient<T>;
-  columns?: Array<{ header: string; render: (row: T) => React.ReactNode; key?: string }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: ResourceClient<any>;
+  columns?: Array<Column<T>>;
   defaultBody?: string;
   listParams?: Record<string, unknown>;
   emptyText?: string;
