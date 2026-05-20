@@ -1,0 +1,17 @@
+# Netlify deployment config for this TanStack Start SPA.
+# The app has no server functions — everything is client-side fetching the
+# external Hop on Mobility API — so we ship the SSR client build as a static SPA.
+
+[build]
+  command = "npm run build"
+  publish = "dist/client"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback: serve index.html for any unmatched route so TanStack Router
+# can handle client-side routing on hard refresh / deep links.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
